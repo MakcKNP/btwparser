@@ -11,18 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
+        Schema::create('images', function (Blueprint $table) {
+            $table->id(); 
+            $table->string('url'); 
+            $table->string('title'); 
+            $table->string('alt'); 
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');                  
         });
     }
-
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('images');
     }
 };

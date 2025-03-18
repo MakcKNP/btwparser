@@ -1,25 +1,23 @@
-version: '3.2'
 services:
   nginx:
-    build:
-      context: ./docker/nginx
-      dockerfile: Dockerfile
+    image: nginx:1.25-alpine  
+    container_name: laravel_nginx
     volumes:
-    - ./:/var/www
+      - ./:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d  
     environment:
       - "DB_PORT=3306"
       - "DB_HOST=mysql"
-      - "XDG_CONFIG_HOME=/app"
     ports:
-    - "8080:80"
-    links:
+      - "8080:80"
+    depends_on:
       - php-fpm
-      - node
+      - mysql
 
   php-fpm:
     build:
       context: ./docker/php-fpm
-      dockerfile: Dockerfile
+    container_name: laravel_php_fpm
     volumes:
       - ./:/var/www
     environment:
@@ -27,38 +25,57 @@ services:
       - "DB_HOST=mysql"
       - "REDIS_PORT=6379"
       - "REDIS_HOST=redis"
-    links:
+    working_dir: /var/www
+    depends_on:
       - mysql
-      - node
+      - redis
 
   php-cli:
-    build:
-      context: ./
-      dockerfile: docker/php-cli.docker
+    image: php:8.2-cli-alpine  
+    container_name: laravel_php_cli
     volumes:
-    - ./:/var/www
+      - ./:/var/www
     environment:
       - "DB_PORT=3306"
       - "DB_HOST=mysql"
       - "COMPOSER_MEMORY_LIMIT=-1"
-    links:
-      - mysql
+    working_dir: /var/www
     tty: true
+    depends_on:
+      - mysql
 
   mysql:
-    image: mysql:8.0
+    image: mysql:8.0  
+    container_name: laravel_mysql
     volumes:
-    - database:/var/lib/mysql
+      - database:/var/lib/mysql
     environment:
       - "MYSQL_ROOT_PASSWORD=secret"
       - "MYSQL_USER=user"
       - "MYSQL_PASSWORD=secret"
       - "MYSQL_DATABASE=laravel"
     ports:
-    - "33061:3306"
+      - "33061:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:7.0-alpine  
+    container_name: laravel_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin:latest  
+    container_name: laravel_phpmyadmin
     environment:
       - PMA_HOST=mysql
       - PMA_USER=user
@@ -66,13 +83,17 @@ services:
       - UPLOAD_LIMIT=64M
     restart: always
     ports:
-      - 8081:80
+      - "8081:80"
+    depends_on:
+      - mysql
+
   node:
-    image: node:18-alpine
+    image: node:20-alpine  
+    container_name: laravel_node
     ports:
-        - "3000:3000"
+      - "3000:3000"
     volumes:
-    - ./:/var/www
+      - ./:/var/www
     working_dir: /var/www
     tty: true
 

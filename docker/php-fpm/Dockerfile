@@ -1,4 +1,4 @@
-FROM php:8.1-fpm
+FROM php:8.2-fpm
 
 RUN apt-get update && apt-get install -y libmcrypt-dev libpng-dev mariadb-client \
     libpng-dev \
@@ -24,6 +24,4 @@ RUN mv composer.phar /usr/local/bin/composer
 COPY ./conf.d /usr/local/etc/php/conf.d/
 
 WORKDIR /var/www
-
-
 
