@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             // SuperUserSeeder::class,
             // RetailerSeeder::class,
             // UserRetailerSeeder::class,
-            ImageSeeder::class
+            // ImageSeeder::class
             
         ]);
     }

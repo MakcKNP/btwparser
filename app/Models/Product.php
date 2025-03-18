@@ -13,13 +13,24 @@ class Product extends Model
         'title',
         'description',
         'manufacturer_part_number',
-        'pack_size',
+        'pack_size_id',
+        'user_id',
         'images',
     ];
 
     public function retailers()
     {
         return $this->belongsToMany(Retailer::class, 'product_retailer');
+    }
+
+    public function user()
+    {
+        return $this->belongsToMany(User::class, 'user_id');
+    }
+
+    public function packSize()
+    {
+        return $this->belongsTo(PackSize::class, 'pack_size_id');
     }
 
     public function scrapedData()
